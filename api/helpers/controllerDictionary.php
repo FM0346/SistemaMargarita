@@ -1,14 +1,16 @@
 <?php
 
-/*
-    Diccionario de controladores,
-    Se subdivide hasta llegar al controlador y acción deseado
-*/
-
+/**
+ * Diccionario de controladores
+ * se subdivide hasta llegar al controlador y acción deseada
+ */
 return [
     'primer-usuario' => [
         'validar' => [
-            'action' => '/sitioPrincipal/primerUsuario.php@validarPrimerUsuario'
+            'action' => 'primerUsuario.php@validarPrimerUsuario'
+        ],
+        'crear' => [
+            'action' => 'primerUsuario.php@crearPrimerUsuario'
         ]
     ]
 ];

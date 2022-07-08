@@ -1,37 +1,44 @@
-import { RouteRecordRaw } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
+  //* Estructura de la webapp
   {
     path: '/',
-    redirect: '/login',
-
-
-  },
-  {
-    path: '/primer-usuario',
-    component: () => import('src/layouts/sitioPrincipal/LoginLayout.vue'),
+    //* Todos los sitios utilizan el layout AppLayout
+    component: () => import('src/layouts/AppLayout.vue'),
     children: [
+      //* Index redirige al acceso del login
       {
-        path: '/primer-usuario', component: () => import('pages/sitioPrincipal/primerUsuario/PrimerUsuarioCreacion.vue')
-      }
+        path: '/',
+        redirect: '/login/acceso',
+      },
+      {
+        path: '/primer-usuario/registro',
+        component: () => import('src/layouts/PrimerUsuarioLayout.vue'),
+        children: [
+          {
+            path: '/primer-usuario/registro',
+            component: () => import('src/pages/PrimerUsuarioRegistro.vue'),
+          },
+        ],
+      },
+      {
+        path: '/login/acceso',
+        component: () => import('src/layouts/principal/LoginLayout.vue'),
+        children: [
+          {
+            path: '/login/acceso',
+            component: () => import('pages/principal/login/LoginAcceso.vue'),
+          },
+        ],
+      },
     ],
   },
-
-   {
-    path: '/login',
-    component: () => import('src/layouts/sitioPrincipal/LoginLayout.vue'),
-    children: [
-      {
-        path: '/login', component: () => import('pages/sitioPrincipal/login/LoginAcceso.vue')
-      }
-    ],
-  },
-  // Always leave this as last one,
-  // but you can also remove it
+  //* Error sitio no encontrado
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-];
+]
 
-export default routes;
+export default routes

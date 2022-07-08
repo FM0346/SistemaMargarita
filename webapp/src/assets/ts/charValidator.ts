@@ -10,6 +10,12 @@ class CharValidator {
     return str.length == 1
   }
 
+  //Validates if the character chr is a space character
+  static isSpace(chr: string): boolean {
+    if (!this.isCharacter(chr)) return false
+    return chr == ' '
+  }
+
   //Validates if the character chr is a special character
   static isSpecial(chr: string): boolean {
     if (!this.isCharacter(chr)) return false

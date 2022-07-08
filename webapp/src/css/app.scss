@@ -1,1 +1,15 @@
 // app global css in SCSS form
+body,
+.fondo-primario{
+  background-image: linear-gradient(90deg, $primary 0%, $secondary 40%, $secondary 60%, $primary 100%);
+}
+
+.normal-link {
+  color: grey;
+  text-decoration: none;
+}
+
+.dialog-mini {
+  width: 300px;
+  height: 275px;
+}
