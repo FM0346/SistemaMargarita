@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useMensajesAppStore = defineStore('mensajesApp', {
   state: () => ({
-    mensaje: 'Hola mundo',
+    mensaje: '',
     tipoMensaje: 'negative',
     mostrarMensaje: false,
   }),
@@ -16,6 +16,7 @@ export const useMensajesAppStore = defineStore('mensajesApp', {
   },
   actions: {
     asignarMensaje(mensaje: string, tipoMensaje: string): void {
+      console.log(mensaje)
       this.mensaje = mensaje
       this.tipoMensaje = tipoMensaje
       this.mostrarMensaje = true

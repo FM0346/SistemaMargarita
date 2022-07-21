@@ -306,7 +306,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { usePrimerUsuarioStore } from 'src/stores/primerUsuario'
-import { Validator } from 'src/assets/ts/Validator'
+import { Validator } from 'src/assets/ts/validator'
 import { useMensajesAppStore } from 'src/stores/mensajesApp'
 
 export default defineComponent({
@@ -322,7 +322,7 @@ export default defineComponent({
       contraseniaConfirmarVisible: ref(false), // Visibilidad del campo 'confirmar contraseña'
     }
   },
-  created() {
+  mounted() {
     // Al ser creado comienza en el paso 1 con campos vacíos
     this.primerUsuario.$reset()
   },

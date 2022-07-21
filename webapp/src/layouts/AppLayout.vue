@@ -47,8 +47,8 @@ export default defineComponent({
     },
   },
   created() {
-    // redirige al origen
-    // this.$router.push('/')
+    //redirige al origen
+    //this.$router.push('/')
   },
 })
 </script>

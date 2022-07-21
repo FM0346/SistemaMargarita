@@ -1,208 +1,134 @@
 <?php
 
-// Requiere de los archivos globales para utilizar módulos
-require_once('./helpers/apiGlobals.php');
+namespace helpers;
 
-class Validator
+/**
+ * Contiene métodos estáticos parar realizar validaciones 
+ */
+class Validator extends CharValidator
 {
-
-    /** 
-     * Método para sanear todos los campos de un formulario (quitar los espacios en blanco al principio y al final).
-     *
-     * Parámetros: $fields (arreglo con los campos del formulario).
-     *   
-     * Retorno: arreglo con los campos saneados del formulario.
+    /**
+     * Método para sanear un arreglo $arr
+     *  
+     * @param array $arr
+     * 
+     * @return array
      */
-    public static function trimForm($fields)
+    public static function trimArray($arr)
     {
-        foreach ($fields as $index => $value) {
-            $value = trim($value);
-            $fields[$index] = $value;
+        // Aplica trim a cada elemento del arreglo en caso sea de tipo string
+        foreach ($arr as $index => $field) {
+            if (gettype($arr[$index]) == 'string') {
+                $form[$index] = trim($field);
+            }
         }
-        return $fields;
-    }
 
-    /** 
-     * Método para validar un número natural como por ejemplo 
-     * llave primaria, llave foránea, entre otros.
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validateNaturalNumber(int $value): bool
-    {
-        // Se verifica que el valor sea un número entero mayor o igual a uno.
-        return filter_var($value, FILTER_VALIDATE_INT, ['min_range' => 1]) ? true : false;
+        return $form;
     }
 
     /**
-     * Método para validar un correo electrónico.
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
+     * Método para validar una sección de una ruta
+     * - Caracteres válidos: letras, números y guiones [a-z, A-Z, 0-9, -]
+     *  
+     * @param string $val
+     * 
+     * @return bool|string retorna true si es válido, caso contrario mensaje de error
      */
-    public static function validateEmail(string $value): bool
+    public static function validRoute($val)
     {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) ? true : false;
+        // Si el string tiene tamaño 0 -> error
+        if (!strlen($val)) return 'Ruta vacía';
+
+        // Si el string tiene caracteres invalidos -> error
+        $invalidChars = array_reduce(
+            str_split($val),
+            function (int $acc, string $char) {
+                return self::isAlphaNumeric($char) || $char == '-' ? $acc : $acc + 1;
+            },
+            0
+        );
+        if ($invalidChars) return 'Ruta contiene caracteres inválidos';
+
+        // Validado -> true
+        return true;
+    }
+
+
+    /** 
+     * Método para validar un usuario
+     *
+     * @param string $val
+     * 
+     * @return bool|string retorna true si es válido, caso contrario mensaje de error
+     */
+    public static function validUser($val)
+    {
+        // Si no es un nombre de usuario o correo válido -> 
+        $validUsername = self::validUsername($val);
+        $validEmail = self::validEmail($val);
+        if ($validUsername !== true && $validEmail !== true) {
+            return 'Formato de usuario incorrecto';
+        }
+
+        // Validado -> true
+        return true;
+    }
+
+
+    /** 
+     * Método para validar un nombre de usuario
+     *
+     * @param string $val Dato a validar
+     * 
+     * @return bool Validación de nombre usuario
+     * @return string Mensaje de error en caso suceda
+     */
+    public static function validUsername(string $val): bool | string
+    {
+        if (strlen($val) == 0) return 'Nombre de usuario no debe estar vacío';
+        if (strlen($val) > 50) return 'Nombre de usuario debe contener menos de 50 caracteres';
+        if (str_contains($val, ' ')) return 'Nombre de usuario no puede contener espacios';
+        if (!self::isAlpha($val[0]))
+            return 'Nombre de usuario debe comenzar con una letra sin tilde';
+        $invalidChars = array_reduce(
+            explode($val, ''),
+            function (int $acc, string $val) {
+                return self::isAlpha($val) || self::isNumber($val) || $val == '_' ? $acc : $acc + 1;
+            },
+            0
+        );
+        if ($invalidChars) return 'Nombre de usuario contiene caracteres inválidos';
+        return true;
     }
 
     /** 
-     * Método para validar una cadena de texto 
-     * (letras, digitos, espacios en blanco y signos de puntuación).
+     * Método para validar un correo electrónico
      *
-     * Parámetros: $value (dato a validar), $minimum (longitud mínima) y $maximum (longitud máxima).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
+     * @param string $val Dato a validar
+     * 
+     * @return bool Validación de correo electrónico
+     * @return string Mensaje de error en caso suceda
      */
-
-    public static function validateString(string $value, int $minimum, int $maximum): bool
+    public static function validEmail(string $val): bool | string
     {
-        // Se verifica el contenido y la longitud de acuerdo con la base de datos.
-        return preg_match('/^[a-zA-Z0-9ñÑáÁéÉíÍóÓúÚ\s\,\;\.]{' . $minimum . ',' . $maximum . '}$/', $value) ? true : false;
-    }
-
-    /**
-     * Método para validar un dato alfabético (letras y espacios en blanco).
-     *
-     * Parámetros: $value (dato a validar), $minimum (longitud mínima) y $maximum (longitud máxima).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validateAlphabetic(string $value, int $minimum, int $maximum): bool
-    {
-        // Se verifica el contenido y la longitud de acuerdo con la base de datos.
-        return preg_match('/^[a-zA-ZñÑáÁéÉíÍóÓúÚ\s]{' . $minimum . ',' . $maximum . '}$/', $value) ? true : false;
-    }
-
-    /**
-     * Método para validar un dato alfabético (letras).
-     *
-     * Parámetros: $value (dato a validar), $minimum (longitud mínima) y $maximum (longitud máxima).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-
-    public static function validateAlphabeticSpaceless(string $value, int $minimum, int $maximum): bool
-    {
-        // Se verifica el contenido y la longitud de acuerdo con la base de datos.
-        return preg_match('/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]{' . $minimum . ',' . $maximum . '}$/', $value) ? true : false;
+        if (strlen($val) == 0) return 'Correo no debe estar vacío';
+        if (strlen($val) > 250) return 'Correo debe contener menos de 256 caracteres';
+        if (!filter_var($val, FILTER_VALIDATE_EMAIL)) return 'Correo debe ser un correo válido';
+        return true;
     }
 
     /** 
-     * Método para validar un dato alfanumérico (letras, dígitos y espacios en blanco).
+     * Método para validar una contraseña
      *
-     * Parámetros: $value (dato a validar), $minimum (longitud mínima) y $maximum (longitud máxima).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
+     * @param string $val Dato a validar
+     * 
+     * @return bool Validación de contraseña
+     * @return string Mensaje de error en caso suceda
      */
-    public static function validateAlphanumeric(string $value, int $minimum, int $maximum): bool
+    public static function validPassword(string $val): bool | string
     {
-        // Se verifica el contenido y la longitud de acuerdo con la base de datos.
-        return preg_match('/^[a-zA-Z0-9ñÑáÁéÉíÍóÓúÚ\s]{' . $minimum . ',' . $maximum . '}$/', $value) ? true : false;
-    }
-
-    /** 
-     * Método para validar un dato alfanumérico (letras, dígitos y espacios en blanco).
-     *
-     * Parámetros: $value (dato a validar), $minimum (longitud mínima) y $maximum (longitud máxima).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validateAlphanumericSpaceless(string $value, int $minimum, int $maximum): bool
-    {
-        // Se verifica el contenido y la longitud de acuerdo con la base de datos.
-        return preg_match('/^[a-zA-Z0-9ñÑáÁéÉíÍóÓúÚ]{' . $minimum . ',' . $maximum . '}$/', $value) ? true : false;
-    }
-
-    /** 
-     * Método para validar un dato monetario.
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validateMoney(string $value): bool
-    {
-        // Se verifica que el número tenga una parte entera y como máximo dos cifras decimales.
-        return preg_match('/^[0-9]+(?:\.[0-9]{1,2})?$/', $value) ? true : false;
-    }
-
-    /** 
-     * Método para validar una contraseña.
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validatePassword(string $value): bool
-    {
-        // Se verifica la longitud mínima.
-        // ! valor temporal entre 1 y 50
-        return (strlen($value) > 0 && strlen($value) <= 50);
-    }
-
-    /** 
-     * Método para validar el formato del DUI (Documento Único de Identidad).
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validateDUI(string $value): bool
-    {
-        // Se verifica que el número tenga el formato 00000000-0.
-        return preg_match('/^[0-9]{8}[-][0-9]{1}$/', $value) ? true : false;
-    }
-
-    /** 
-     * Método para validar un número telefónico.
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validatePhone(string $value): bool
-    {
-        // Se verifica que el número tenga el formato 0000-0000 y que inicie con 2, 6 o 7.
-        return preg_match('/^[2,6,7]{1}[0-9]{3}[-][0-9]{4}$/', $value) ? true : false;
-    }
-
-    /**
-     * Método para validar una fecha.
-     *
-     * Parámetros: $value (dato a validar).
-     *   
-     * Retorno: booleano (true si el valor es correcto o false en caso contrario).
-     */
-    public static function validateDate(string $value): bool
-    {
-        // Se dividen las partes de la fecha y se guardan en un arreglo en el siguiene orden: año, mes y día.
-        $date = explode('-', $value);
-        return checkdate($date[1], $date[2], $date[0]) ? true : false;
-    }
-
-    /** 
-     * Método para validar un archivo de imagen.
-     *
-     * Parámetros: $file (archivo de un formulario), $maxWidth (ancho máximo para la imagen) y 
-     * $maxHeigth (alto máximo para la imagen).
-     *   
-     * Retorno: booleano (true si el archivo es correcto o false en caso contrario).
-     */
-    public static function validateImageFile(mixed $file, int $maxWidth, int $maxHeigth): bool
-    {
-        // Se verifica si el archivo existe
-        if ($file == null) return false;
-        // Se comprueba si el archivo tiene un tamaño menor o igual a 2MB
-        if ($file['size'] > 2097152) return false;
-        // Se obtienen las dimensiones de la imagen y su tipo.
-        list($width, $height, $type) = getimagesize($file['tmp_name']);
-        // Se verifica si la imagen cumple con las dimensiones máximas.
-        if ($width > $maxWidth || $height > $maxHeigth) return false;
-        // Se comprueba si el tipo de imagen es permitido (2 - JPG y 3 - PNG)
-        if (($type == 2 || $type == 3) == false) return false;
+        if (strlen($val) == 0) return 'Contraseña no debe estar vacía';
+        if (strlen($val) > 50) return 'Contraseña debe contener menos de 50 caracteres';
         return true;
     }
 }

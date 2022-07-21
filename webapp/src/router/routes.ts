@@ -1,29 +1,33 @@
 import { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
-  //* Estructura de la webapp
+  // Estructura de la wepApp
   {
     path: '/',
-    //* Todos los sitios utilizan el layout AppLayout
+    redirect: '/login/acceso',
+  },
+  // Principal, redirige a /login/acceso
+  {
+    path: '/',
     component: () => import('src/layouts/AppLayout.vue'),
     children: [
-      //* Index redirige al acceso del login
+      // Primer usuario
       {
-        path: '/',
-        redirect: '/login/acceso',
-      },
-      {
-        path: '/primer-usuario/registro',
+        path: '/primer-usuario/',
         component: () => import('src/layouts/PrimerUsuarioLayout.vue'),
+        // Hijos
         children: [
           {
+            // Registro de primer usuario
             path: '/primer-usuario/registro',
             component: () => import('src/pages/PrimerUsuarioRegistro.vue'),
           },
         ],
       },
+
+      // Login
       {
-        path: '/login/acceso',
+        path: '/login/',
         component: () => import('src/layouts/principal/LoginLayout.vue'),
         children: [
           {
@@ -32,12 +36,28 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+
+      // Dashboard
+      {
+        path: '/dashboard/',
+        component: () => import('src/layouts/principal/DashboardLayout.vue'),
+        children: [
+          {
+            path: '/dashboard/main',
+            component: () => import('pages/principal/dashboard/DashboardMain.vue'),
+            meta: {
+              title: 'Donaciones Margarita',
+            },
+          },
+        ],
+      },
     ],
   },
-  //* Error sitio no encontrado
+
+  // Caso de error
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
+    component: () => import('pages/Error404.vue'),
   },
 ]
 

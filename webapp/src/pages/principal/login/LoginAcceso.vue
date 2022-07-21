@@ -16,24 +16,23 @@
               <div class="col text-subtitle1 ellipsis text-uppercase">Login</div>
             </div>
           </q-card-section>
-          <q-card-section>
+          <q-card-section class>
             <!-- sección del formulario -->
             <q-form
               class="q-gutter-lg"
-              greedy
               autocorrect="off"
               autocapitalize="off"
               autocomplete="off"
               spellcheck="false"
+              @submit="login.apiIniciarAcceso()"
             >
               <q-input
                 label="Nombre de usuario o correo electrónico"
                 outlined
-                hide-bottom-space
-                v-model="login.nombre_usuario"
+                v-model="login.usuario"
                 maxlength="255"
                 clear-icon="close"
-                :rules="[(val) => val.length > 0 || 'Ingresa un nombre de usario o correo electrónico']"
+                :rules="[(val) => val.length > 0 || 'Campo vacío']"
               >
                 <template v-slot:prepend>
                   <q-icon name="fa-solid fa-user" class="text-primary" />
@@ -43,18 +42,17 @@
               <q-input
                 label="Password"
                 outlined
-                hide-bottom-space
                 v-model="login.contrasenia"
-                :type="login.contraseniaVisible ? 'text' : 'password'"
+                :type="contraseniaVisible ? 'text' : 'password'"
                 maxlength="100"
-                :rules="[(val) => val.length > 0 || 'Ingresa una contraseña']"
+                :rules="[(val) => val.length > 0 || 'Campo vacío']"
                 autocomplete="off"
               >
                 <template v-slot:append>
                   <q-icon
-                    :name="login.contraseniaVisible ? 'visibility' : 'visibility_off'"
+                    :name="contraseniaVisible ? 'visibility' : 'visibility_off'"
                     class="cursor-pointer"
-                    @click="login.cambiarContraseniaVisible"
+                    @click="contraseniaVisible = !contraseniaVisible"
                   />
                 </template>
                 <template v-slot:prepend>
@@ -62,9 +60,7 @@
                 </template>
               </q-input>
               <div align="right">
-                <router-link to="/dashboard/login/recover-password" class="normal-link">
-                  ¿Olvidaste tu contraseña?
-                </router-link>
+                <router-link to="/login/acceso" class="normal-link"> ¿Olvidaste tu contraseña? </router-link>
               </div>
 
               <!-- Botón submit -->
@@ -77,10 +73,28 @@
       </div>
     </div>
   </q-page>
+
+  <q-dialog v-model="login.accesoUsuario" persistent>
+    <q-card class="dialog-mini">
+      <q-card-section>
+        <div class="text-h6 q-pb-sm text-uppercase">Sesión iniciada</div>
+        <q-separator />
+        <div class="q-pt-lg">
+          <q-avatar icon="fa-solid fa-check" color="green-6" text-color="white" />
+          <span class="q-ml-lg align-right">Se ha iniciado sesión</span>
+        </div>
+        <div class="q-pt-lg">Sesión iniciada correctamente</div>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Continuar" class="bg-primary" color="white" to="/dashboard/main" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useLoginStore } from 'src/stores/principal/login'
 
 export default defineComponent({
@@ -88,7 +102,11 @@ export default defineComponent({
     const login = useLoginStore()
     return {
       login,
+      contraseniaVisible: ref(false), // Visibilidad del campo 'contraseña'
     }
+  },
+  mounted() {
+    //this.login.apiValidarAcceso()
   },
 })
 </script>
